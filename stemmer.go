@@ -53,6 +53,8 @@ func NewStemmer(dict Dictionary) *Stemmer {
 }
 
 func (stemmer *Stemmer) Stem(word string) string {
+	word = strings.ToLower(word)
+
 	var (
 		rootFound    = false
 		originalWord = word
