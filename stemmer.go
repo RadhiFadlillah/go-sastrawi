@@ -251,49 +251,49 @@ func (stemmer *Stemmer) removeMePrefix(word string) (string, []string) {
 	s5 := newChar(word, 4)
 
 	// Pattern 01
-	// me[lrwy][aiueo] => [lrwy][aiueo]
+	// me{l|r|w|y}V => me-{l|r|w|y}V
 	if s3.is("lrwy") && s4.is(vowel) {
 		return word[2:], nil
 	}
 
 	// Pattern 02
-	// mem[bfv] => [bfv]
+	// mem{b|f|v} => mem-{b|f|v}
 	if s3.is("m") && s4.is("bfv") {
 		return word[3:], nil
 	}
 
 	// Pattern 03
-	// mempe => pe
+	// mempe => mem-pe
 	if s3.is("m") && s4.is("p") && s5.is("e") {
 		return word[3:], nil
 	}
 
 	// Pattern 04
-	// mem(r?)[aiueo] => m(r?)[aiueo] OR p(r?)[aiueo]
+	// mem{rV|V} => mem-{rV|V} OR me-p{rV|V}
 	if s3.is("m") && (s4.is(vowel) || (s4.is("r") && s5.is(vowel))) {
 		return word[3:], []string{"m", "p"}
 	}
 
 	// Pattern 05
-	// men[cdjstz] => [cdjstz]
+	// men{c|d|j|s|t|z} => men-{c|d|j|s|t|z}
 	if s3.is("n") && s4.is("cdjstz") {
 		return word[3:], nil
 	}
 
 	// Pattern 06
-	// men[aiueo] => n[aiueo] OR t[aiueo]
+	// menV => nV OR tV
 	if s3.is("n") && s4.is(vowel) {
 		return word[3:], []string{"n", "t"}
 	}
 
 	// Pattern 07
-	// meng[ghqk] => [ghqk]
+	// meng{g|h|q|k} => meng-{g|h|q|k}
 	if s3.is("n") && s4.is("g") && s5.is("ghqk") {
 		return word[4:], nil
 	}
 
 	// Pattern 08
-	// meng[aiueo] => [aiueo]
+	// mengV => meng-V OR meng-kV OR me-ngV OR mengV- where V = 'e'
 	if s3.is("n") && s4.is("g") && s5.is(vowel) {
 		if s5.is("e") {
 			return word[5:], nil
@@ -303,7 +303,7 @@ func (stemmer *Stemmer) removeMePrefix(word string) (string, []string) {
 	}
 
 	// Pattern 09
-	// meny[aiueo] => s[aiueo]
+	// menyV => meny-sV OR me-nyV to stem menyala
 	if s3.is("n") && s4.is("y") && s5.is(vowel) {
 		if s5.is("a") {
 			return word[2:], nil
@@ -313,7 +313,7 @@ func (stemmer *Stemmer) removeMePrefix(word string) (string, []string) {
 	}
 
 	// Pattern 10
-	// memp[^e] => p[^e]
+	// mempV => mem-pV where V != 'e'
 	if s3.is("m") && s4.is("p") && s5.isNot("e") {
 		return word[3:], nil
 	}
@@ -330,61 +330,61 @@ func (stemmer *Stemmer) removePePrefix(word string) (string, []string) {
 	s8 := newChar(word, 7)
 
 	// Pattern 01
-	// pe[wy][aiueo] => [wy][aiueo]
+	// pe{w|y}V => pe-{w|y}V
 	if s3.is("wy") && s4.is(vowel) {
 		return word[2:], nil
 	}
 
 	// Pattern 02
-	// per[aiueo] => [aiueo] OR r[aiueo]
+	// perV => per-V OR pe-rV
 	if s3.is("r") && s4.is(vowel) {
 		return word[3:], []string{"r"}
 	}
 
 	// Pattern 03
-	// per[^aiueor][a-z][^e] => [^aiueor][a-z][^e]
+	// perCAP => per-CAP where C != 'r' and P != 'er'
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.isNot("e") {
 		return word[3:], nil
 	}
 
 	// Pattern 4
-	// per[^aiueor][a-z]er[aiueo] => [^aiueor][a-z]er[aiueo]
+	// perCAerV => per-CAerV where C != 'r'
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.is("e") && s7.is("r") && s8.is(vowel) {
 		return word[3:], nil
 	}
 
 	// Pattern 05
-	// pem[bfv] => [bfv]
+	// pem{b|f|v} => pem-{b|f|v}
 	if s3.is("m") && s4.is("bfv") {
 		return word[3:], nil
 	}
 
 	// Pattern 06
-	// pem(r?)[aiueo] => m(r?)[aiueo] OR p(r?)[aiueo]
+	// pem{rV|V} => pe-m{rV|V} OR pe-p{rV|V}
 	if s3.is("m") && (s4.is(vowel) || (s4.is("r") && s5.is(vowel))) {
 		return word[3:], []string{"m", "p"}
 	}
 
 	// Pattern 07
-	// pen[cdjz] => [cdjz]
+	// pen{c|d|j|z} => pen-{c|d|j|z}
 	if s3.is("n") && s4.is("cdjz") {
 		return word[3:], nil
 	}
 
 	// Pattern 08
-	// pen[aiueo] => n[aiueo] OR t[aiueo]
+	// penV => pe-nV OR pe-tV
 	if s3.is("n") && s4.is(vowel) {
 		return word[3:], []string{"n", "t"}
 	}
 
 	// Pattern 09
-	// peng[^aiueo] => [^aiueo]
+	// pengC => peng-C
 	if s3.is("n") && s4.is("g") && s5.is(consonant) {
 		return word[4:], nil
 	}
 
 	// Pattern 10
-	// peng[aiueo] => [aiueo] OR k[aiueo]
+	// pengV => peng-V OR peng-kV OR pengV- where V = 'e'
 	if s3.is("n") && s4.is("g") && s5.is(vowel) {
 		if s5.is("e") {
 			return word[5:], nil
@@ -394,17 +394,13 @@ func (stemmer *Stemmer) removePePrefix(word string) (string, []string) {
 	}
 
 	// Pattern 11
-	// peny[aiueo] => s[aiueo]
+	// penyV => peny-sV OR pe-nyV
 	if s3.is("n") && s4.is("y") && s5.is(vowel) {
-		if s5.is("a") {
-			return word[2:], nil
-		}
-
-		return "s" + word[4:], nil
+		return word[4:], []string{"s", "ny"}
 	}
 
 	// Pattern 12
-	// pel[aiueo] => l[aiueo] OR 'ajar' for 'pelajar'
+	// pelV => pe-lV OR pel-V for pelajar
 	if s3.is("l") && s4.is(vowel) {
 		if word == "pelajar" {
 			return "ajar", nil
@@ -414,19 +410,19 @@ func (stemmer *Stemmer) removePePrefix(word string) (string, []string) {
 	}
 
 	// Pattern 13
-	// pe[^aiueorwylmn]er[aiueo] => er[aiueo]
+	// peCerV => per-erV where C != {r|w|y|l|m|n}
 	if s3.is(consonant) && s3.isNot("rwylmn") && s4.is("e") && s5.is("r") && s6.is(vowel) {
 		return word[3:], nil
 	}
 
 	// Pattern 14
-	// pe[^aiueorwylmn][^e] => [^aiueorwylmn][^e]
+	// peCP => pe-CP where C != {r|w|y|l|m|n} and P != 'er'
 	if s3.is(consonant) && s3.isNot("rwylmn") && s4.isNot("e") {
 		return word[2:], nil
 	}
 
 	// Pattern 15
-	// pe[^aiueorwylmn]er[^aiueo] => [^aiueorwylmn]er[^aiueo]
+	// peC1erC2 => pe-C1erC2 where C1 != {r|w|y|l|m|n}
 	if s3.is(consonant) && s3.isNot("rwylmn") && s4.is("e") && s5.is("r") && s6.is(consonant) {
 		return word[2:], nil
 	}
@@ -443,31 +439,31 @@ func (stemmer *Stemmer) removeBePrefix(word string) (string, []string) {
 	s8 := newChar(word, 7)
 
 	// Pattern 01
-	// ber[aiueo] => [aiueo] OR r[aiueo]
+	// berV => ber-V OR be-rV
 	if s3.is("r") && s4.is(vowel) {
 		return word[3:], []string{"r"}
 	}
 
 	// Pattern 02
-	// ber[^aiueor][a-z][^e] => [^aiueor][a-z][^e]
+	// berCAP => ber-CAP
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.isNot("e") {
 		return word[3:], nil
 	}
 
 	// Pattern 3
-	// ber[^aiueor][a-z]er[aiueo] => [^aiueor][a-z]er[aiueo]
+	// berCAerV => ber-CAerV where C != 'r'
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.is("e") && s7.is("r") && s8.is(vowel) {
 		return word[3:], nil
 	}
 
 	// Pattern 04
-	// belajar => ajar
+	// belajar => bel-ajar
 	if word == "belajar" {
 		return word[3:], nil
 	}
 
 	// Pattern 5
-	// be[^aiueorl]er[^aiueo] => [^aiueorl]er[^aiueo]
+	// beC1erC2 => be-C1erC2 where C1 != {'r'|'l'}
 	if s3.is(consonant) && s3.isNot("r") && s3.isNot("l") && s4.is("e") && s5.is("r") && s6.is(consonant) {
 		return word[2:], nil
 	}
@@ -483,31 +479,31 @@ func (stemmer *Stemmer) removeTePrefix(word string) (string, []string) {
 	s7 := newChar(word, 6)
 
 	// Pattern 01
-	// ter[aiueo] => [aiueo] OR r[aiueo]
+	// terV => ter-V OR te-rV
 	if s3.is("r") && s4.is(vowel) {
 		return word[3:], []string{"r"}
 	}
 
 	// Pattern 02
-	// ter[^aiueor]er[aiueo] => [^aiueor]er[aiueo]
+	// terCerV => ter-CerV where C != 'r'
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.is("e") && s6.is("r") && s7.is(vowel) {
 		return word[3:], nil
 	}
 
 	// Pattern 3
-	// ter[^aiueor][^e] => [^aiueor][^e]
+	// terCP => ter-CP where C != 'r' and P != 'er'
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("e") {
 		return word[3:], nil
 	}
 
 	// Pattern 04
-	// te[^aiueor]er[^aiueo] => [^aiueor]er[^aiueo]
+	// teC1erC2 => te-C1erC2 where C1 != 'r'
 	if s3.is(consonant) && s3.isNot("r") && s4.is("e") && s5.is("r") && s6.is(consonant) {
 		return word[2:], nil
 	}
 
 	// Pattern 05
-	// ter[^aiueor]er[^aiueo] => [^aiueor]er[^aiueo]
+	// terC1erC2 => ter-C1erC2 where C1 != 'r'
 	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.is("e") && s6.is("r") && s7.is(consonant) {
 		return word[3:], nil
 	}
