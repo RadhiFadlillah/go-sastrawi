@@ -34,6 +34,7 @@ func (c char) isNot(chars string) bool {
 	return !c.is(chars)
 }
 
+// Stemmer is object for stemming word
 type Stemmer struct {
 	dictionary    Dictionary
 	rxPrefixFirst *regexp.Regexp
@@ -42,6 +43,7 @@ type Stemmer struct {
 	rxSuffix      *regexp.Regexp
 }
 
+// NewStemmer returns new Stemmer using dict as its dictionary
 func NewStemmer(dict Dictionary) Stemmer {
 	return Stemmer{
 		dictionary:    dict,
@@ -52,6 +54,7 @@ func NewStemmer(dict Dictionary) Stemmer {
 	}
 }
 
+// Stem reduces inflected or derived word to its root form
 func (stemmer Stemmer) Stem(word string) string {
 	word = strings.ToLower(word)
 
@@ -217,7 +220,7 @@ func (stemmer Stemmer) removePrefix(word string) (string, string, []string) {
 	var (
 		prefix   string
 		result   string
-		recoding []string = nil
+		recoding []string
 	)
 
 	if strings.HasPrefix(word, "di") || strings.HasPrefix(word, "ke") || strings.HasPrefix(word, "se") || strings.HasPrefix(word, "ku") {

@@ -4,8 +4,10 @@ import (
 	"fmt"
 )
 
+// Dictionary is map[string]struct{} that used as root words database
 type Dictionary map[string]struct{}
 
+// NewDictionary creates new Dictionary with words as its content
 func NewDictionary(words ...string) Dictionary {
 	dict := make(map[string]struct{})
 	for _, word := range words {
@@ -15,23 +17,27 @@ func NewDictionary(words ...string) Dictionary {
 	return Dictionary(dict)
 }
 
+// Find is used for searching word within dictionary
 func (dictionary Dictionary) Find(word string) bool {
 	_, found := dictionary[word]
 	return found
 }
 
+// Add is used to append new words to dictionary
 func (dictionary Dictionary) Add(words ...string) {
 	for _, word := range words {
 		dictionary[word] = struct{}{}
 	}
 }
 
+// Remove is used to remove some words from dictionary
 func (dictionary Dictionary) Remove(words ...string) {
 	for _, word := range words {
 		delete(dictionary, word)
 	}
 }
 
+// Print is used for printing content of dictionary, where each word is separated by separator
 func (dictionary Dictionary) Print(separator string) {
 	if separator == "" {
 		separator = ", "
@@ -49,6 +55,7 @@ func (dictionary Dictionary) Print(separator string) {
 	}
 }
 
+// DefaultDictionary is database of root words in Indonesian language from Kateglo
 var DefaultDictionary = NewDictionary(
 	"aba", "abad", "abadi", "abadiah", "abah", "abai", "abaimana", "abaka",
 	"abaktinal", "abakus", "abal-abal", "aban", "abang", "abangan", "abangga", "abar",
