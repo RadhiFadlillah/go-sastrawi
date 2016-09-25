@@ -16,6 +16,18 @@ func (dictionary Dictionary) Find(word string) bool {
 	return found
 }
 
+func (dictionary Dictionary) Add(words ...string) {
+	for _, word := range words {
+		dictionary[word] = struct{}{}
+	}
+}
+
+func (dictionary Dictionary) Remove(words ...string) {
+	for _, word := range words {
+		delete(dictionary, word)
+	}
+}
+
 var DefaultDictionary = NewDictionary(
 	"aba",
 	"abad",
