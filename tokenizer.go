@@ -15,8 +15,8 @@ type Tokenizer struct {
 	rxWhitespace *regexp.Regexp
 }
 
-func NewTokenizer() *Tokenizer {
-	return &Tokenizer{
+func NewTokenizer() Tokenizer {
+	return Tokenizer{
 		rxURL:        regexp.MustCompile(`(www\.|https?|s?ftp)\S+`),
 		rxEmail:      regexp.MustCompile(`\S+@\S+`),
 		rxTwitter:    regexp.MustCompile(`(@|#)\S+`),
@@ -25,7 +25,7 @@ func NewTokenizer() *Tokenizer {
 	}
 }
 
-func (tokenizer *Tokenizer) Tokenize(sentence string) []string {
+func (tokenizer Tokenizer) Tokenize(sentence string) []string {
 	// Normalize sentence and remove all symbol
 	sentence = strings.ToLower(sentence)
 	sentence = html.UnescapeString(sentence)

@@ -42,8 +42,8 @@ type Stemmer struct {
 	rxSuffix      *regexp.Regexp
 }
 
-func NewStemmer(dict Dictionary) *Stemmer {
-	return &Stemmer{
+func NewStemmer(dict Dictionary) Stemmer {
+	return Stemmer{
 		dictionary:    dict,
 		rxPrefixFirst: regexp.MustCompile(`^(be.+lah|be.+an|me.+i|di.+i|pe.+i|ter.+i)$`),
 		rxParticle:    regexp.MustCompile(`-?(lah|kah|tah|pun)$`),
@@ -52,7 +52,7 @@ func NewStemmer(dict Dictionary) *Stemmer {
 	}
 }
 
-func (stemmer *Stemmer) Stem(word string) string {
+func (stemmer Stemmer) Stem(word string) string {
 	word = strings.ToLower(word)
 
 	var (
@@ -137,25 +137,25 @@ func (stemmer *Stemmer) Stem(word string) string {
 	return originalWord
 }
 
-func (stemmer *Stemmer) removeParticle(word string) (string, string) {
+func (stemmer Stemmer) removeParticle(word string) (string, string) {
 	result := stemmer.rxParticle.ReplaceAllString(word, "")
 	particle := strings.Replace(word, result, "", 1)
 	return particle, result
 }
 
-func (stemmer *Stemmer) removePossesive(word string) (string, string) {
+func (stemmer Stemmer) removePossesive(word string) (string, string) {
 	result := stemmer.rxPossesive.ReplaceAllString(word, "")
 	possesive := strings.Replace(word, result, "", 1)
 	return possesive, result
 }
 
-func (stemmer *Stemmer) removeSuffix(word string) (string, string) {
+func (stemmer Stemmer) removeSuffix(word string) (string, string) {
 	result := stemmer.rxSuffix.ReplaceAllString(word, "")
 	suffix := strings.Replace(word, result, "", 1)
 	return suffix, result
 }
 
-func (stemmer *Stemmer) loopPengembalianAkhiran(originalWord string, suffixes []string) (bool, string) {
+func (stemmer Stemmer) loopPengembalianAkhiran(originalWord string, suffixes []string) (bool, string) {
 	lenSuffixes := 0
 	for _, suffix := range suffixes {
 		lenSuffixes += len(suffix)
@@ -182,7 +182,7 @@ func (stemmer *Stemmer) loopPengembalianAkhiran(originalWord string, suffixes []
 	return false, originalWord
 }
 
-func (stemmer *Stemmer) removePrefixes(word string) (bool, string) {
+func (stemmer Stemmer) removePrefixes(word string) (bool, string) {
 	originalWord := word
 	currentPrefix := ""
 	removedPrefix := ""
@@ -213,7 +213,7 @@ func (stemmer *Stemmer) removePrefixes(word string) (bool, string) {
 	return false, word
 }
 
-func (stemmer *Stemmer) removePrefix(word string) (string, string, []string) {
+func (stemmer Stemmer) removePrefix(word string) (string, string, []string) {
 	var (
 		prefix   string
 		result   string
@@ -245,7 +245,7 @@ func (stemmer *Stemmer) removePrefix(word string) (string, string, []string) {
 	return prefix, result, recoding
 }
 
-func (stemmer *Stemmer) removeMePrefix(word string) (string, []string) {
+func (stemmer Stemmer) removeMePrefix(word string) (string, []string) {
 	s3 := newChar(word, 2)
 	s4 := newChar(word, 3)
 	s5 := newChar(word, 4)
@@ -321,7 +321,7 @@ func (stemmer *Stemmer) removeMePrefix(word string) (string, []string) {
 	return word, nil
 }
 
-func (stemmer *Stemmer) removePePrefix(word string) (string, []string) {
+func (stemmer Stemmer) removePePrefix(word string) (string, []string) {
 	s3 := newChar(word, 2)
 	s4 := newChar(word, 3)
 	s5 := newChar(word, 4)
@@ -430,7 +430,7 @@ func (stemmer *Stemmer) removePePrefix(word string) (string, []string) {
 	return word, nil
 }
 
-func (stemmer *Stemmer) removeBePrefix(word string) (string, []string) {
+func (stemmer Stemmer) removeBePrefix(word string) (string, []string) {
 	s3 := newChar(word, 2)
 	s4 := newChar(word, 3)
 	s5 := newChar(word, 4)
@@ -471,7 +471,7 @@ func (stemmer *Stemmer) removeBePrefix(word string) (string, []string) {
 	return word, nil
 }
 
-func (stemmer *Stemmer) removeTePrefix(word string) (string, []string) {
+func (stemmer Stemmer) removeTePrefix(word string) (string, []string) {
 	s3 := newChar(word, 2)
 	s4 := newChar(word, 3)
 	s5 := newChar(word, 4)
@@ -511,7 +511,7 @@ func (stemmer *Stemmer) removeTePrefix(word string) (string, []string) {
 	return word, nil
 }
 
-func (stemmer *Stemmer) removeInfix(word string) (string, []string) {
+func (stemmer Stemmer) removeInfix(word string) (string, []string) {
 	s1 := newChar(word, 0)
 	s2 := newChar(word, 1)
 	s3 := newChar(word, 2)
