@@ -54,6 +54,11 @@ func NewStemmer(dict Dictionary) Stemmer {
 	}
 }
 
+// ChangeDictionary changes dictionary that used in Stemmer
+func (stemmer *Stemmer) ChangeDictionary(dict Dictionary) {
+	stemmer.dictionary = dict
+}
+
 // Stem reduces inflected or derived word to its root form
 func (stemmer Stemmer) Stem(word string) string {
 	word = strings.ToLower(word)
