@@ -1,6 +1,6 @@
 # Go-Sastrawi
 
-[![GoDoc](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi?status.png)](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi)
+[![GoDoc](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi?status.png)](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi) [![Build Status](https://travis-ci.org/RadhiFadlillah/go-sastrawi.svg?branch=master)](https://travis-ci.org/RadhiFadlillah/go-sastrawi)
 
 
 Go-Sastrawi is a Go package for doing stemming in Indonesian language. It is based from [Sastrawi](https://github.com/sastrawi/sastrawi) for PHP by [Andy Librian](https://github.com/andylibrian). For more information in English, see [readme](https://github.com/RadhiFadlillah/go-sastrawi/blob/master/README.en.md).
