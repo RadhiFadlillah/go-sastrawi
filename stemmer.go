@@ -374,8 +374,8 @@ func (stemmer Stemmer) removePePrefix(word string) (string, []string) {
 	}
 
 	// Pattern 07
-	// pen{c|d|j|z} => pen-{c|d|j|z}
-	if s3.is("n") && s4.is("cdjz") {
+	// pen{c|d|j|s|t|z} => pen-{c|d|j|s|t|z}
+	if s3.is("n") && s4.is("cdjstz") {
 		return word[3:], nil
 	}
 
