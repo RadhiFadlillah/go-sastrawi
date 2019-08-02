@@ -2914,7 +2914,7 @@ var DefaultDictionary = NewDictionary(
 	"rekor", "rekreasi", "rekrut", "rekrutmen", "reksa", "rekstok", "rektifikasi", "rekto",
 	"rektor", "rekuiem", "rekuisisi", "rekuisitor", "rekurs", "rel", "rela", "relai",
 	"relaks", "relaksasi", "relang", "relap", "relas", "relasi", "relatif", "relativisasi",
-	"relativisme", "relativitas", "relau", "relban", "relevan", "relevansi", "reli", "reliabel",
+	"relativisme", "relativitas", "relau", "relawan", "relban", "relevan", "relevansi", "reli", "reliabel",
 	"reliabilitas", "relief", "religi", "religiositas", "religius", "relik", "relikui", "relikwi",
 	"relokasi", "reluk", "relung", "rem", "rema", "remah", "remai", "remaja",
 	"remak", "remanen", "remang", "remas", "rematik", "rematisme", "rematoid", "rembah",
