@@ -17,11 +17,16 @@ func NewDictionary(words ...string) Dictionary {
 	return Dictionary(dict)
 }
 
-// Find is used for searching word within dictionary
-func (dictionary Dictionary) Find(word string) bool {
+// Count returns the size of dictionary
+func (dictionary Dictionary) Count() int {
+	return len(dictionary)
+}
+
+// Contains is used for to check if word exists within dictionary
+func (dictionary Dictionary) Contains(word string) bool {
 	_, found := dictionary[word]
 	return found
-}
+} 
 
 // Add is used to append new words to dictionary
 func (dictionary Dictionary) Add(words ...string) {

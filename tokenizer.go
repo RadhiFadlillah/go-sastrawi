@@ -41,5 +41,5 @@ func (tokenizer Tokenizer) Tokenize(sentence string) []string {
 	sentence = tokenizer.rxWhitespace.ReplaceAllString(sentence, " ")
 	sentence = strings.TrimSpace(sentence)
 
-	return strings.Split(sentence, " ")
+	return strings.Fields(sentence)
 }

@@ -75,7 +75,7 @@ func (stemmer Stemmer) Stem(word string) string {
 		return word
 	}
 
-	if stemmer.dictionary.Find(word) {
+	if stemmer.dictionary.Contains(word) {
 		return word
 	}
 
@@ -89,37 +89,37 @@ func (stemmer Stemmer) Stem(word string) string {
 
 		// Remove particle
 		particle, word = stemmer.removeParticle(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return word
 		}
 
 		// Remove possesive
 		possesive, word = stemmer.removePossesive(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return word
 		}
 
 		// Remove suffix
 		suffix, word = stemmer.removeSuffix(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return word
 		}
 	} else {
 		// Remove particle
 		particle, word = stemmer.removeParticle(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return word
 		}
 
 		// Remove possesive
 		possesive, word = stemmer.removePossesive(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return word
 		}
 
 		// Remove suffix
 		suffix, word = stemmer.removeSuffix(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return word
 		}
 
@@ -177,7 +177,7 @@ func (stemmer Stemmer) loopPengembalianAkhiran(originalWord string, suffixes []s
 		}
 
 		word := wordWithoutSuffix + suffixCombination
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return true, word
 		}
 
@@ -207,12 +207,12 @@ func (stemmer Stemmer) removePrefixes(word string) (bool, string) {
 		}
 
 		removedPrefix, word, recodingChar = stemmer.removePrefix(word)
-		if stemmer.dictionary.Find(word) {
+		if stemmer.dictionary.Contains(word) {
 			return true, word
 		}
 
 		for _, char := range recodingChar {
-			if stemmer.dictionary.Find(char + word) {
+			if stemmer.dictionary.Contains(char + word) {
 				return true, char + word
 			}
 		}
