@@ -13,7 +13,7 @@ From [Wikipedia](https://en.wikipedia.org/wiki/Stemming), stemming is the proces
 
 ## Usage Examples
 
-This package has two main components. First is [Tokenizer](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi#Tokenizer) that used for splitting sentence into words and remove symbols and URLs from the sentence. The second is [Stemmer](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi#Stemmer) that used for reducing inflected word to its root form.
+The most basic usage is by using default dictionary that provided by Sastrawi :
 
 ```go
 import (
@@ -25,19 +25,16 @@ func main() {
 	// Original sentence
 	sentence := "Rakyat memenuhi halaman gedung untuk menyuarakan isi hatinya. Baca berita selengkapnya di http://www.kompas.com."
 
-	// Split sentence into words using tokenizer
-	tokenizer := sastrawi.NewTokenizer()
-	words := tokenizer.Tokenize(sentence)
-
 	// Reduce inflected words to its root form
-	stemmer := sastrawi.NewStemmer(sastrawi.DefaultDictionary)
-	for _, word := range words {
+	dictionary := sastrawi.DefaultDictionary()
+	stemmer := sastrawi.NewStemmer(dictionary)
+	for _, word := range sastrawi.Tokenize(sentence) {
 		fmt.Printf("%s => %s\n", word, stemmer.Stem(word))
 	}
 }
 ```
 
-Beside using the default dictionary, you can also create your own root words dictionary.
+Beside using the default dictionary, you can also create your own root words dictionary :
 
 ```go
 import (
@@ -60,10 +57,34 @@ func main() {
 
 	// Use your new dictionary for stemming
 	sentence := "Aku kelaparan dan menginginkan makanan yang bergizi."
-	words := sastrawi.NewTokenizer().Tokenize(sentence)
-
 	stemmer := sastrawi.NewStemmer(dictionary)
-	for _, word := range words {
+	for _, word := range sastrawi.Tokenize(sentence) {
+		fmt.Printf("%s => %s\n", word, stemmer.Stem(word))
+	}
+}
+```
+
+Sastrawi also provides list of stop words that can be used to remove common words in Indonesian language. This list of stop words is an ordinary [`Dictionary`](https://godoc.org/github.com/RadhiFadlillah/go-sastrawi#Dictionary), therefore you can add or remove the stop words depending on your purpose :
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/RadhiFadlillah/go-sastrawi"
+)
+
+func main() {
+	stopwords := sastrawi.DefaultStopword()
+	dictionary := sastrawi.DefaultDictionary()
+	stemmer := sastrawi.NewStemmer(dictionary)
+	sentence := "Perekonomian Indonesia sedang dalam pertumbuhan yang membanggakan"
+
+	for _, word := range sastrawi.Tokenize(sentence) {
+		if stopwords.Contains(word) {
+			continue
+		}
+
 		fmt.Printf("%s => %s\n", word, stemmer.Stem(word))
 	}
 }
@@ -93,3 +114,4 @@ As [Sastrawi](https://github.com/sastrawi/sastrawi) for PHP, Go-Sastrawi is also
 - [JSastrawi](https://github.com/jsastrawi/jsastrawi) - Java
 - [cSastrawi](https://github.com/mohangk/c_sastrawi) - C
 - [PySastrawi](https://github.com/har07/PySastrawi) - Python
+- [Sastrawi-Ruby](https://github.com/meisyal/sastrawi-ruby) - Ruby
