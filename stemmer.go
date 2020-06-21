@@ -1,57 +1,17 @@
 package sastrawi
 
 import (
-	"regexp"
 	"strings"
 )
 
-const (
-	vowel     = "aiueo"
-	consonant = "bcdfghjklmnpqrstvwxyz"
-)
-
-type char string
-
-func newChar(word string, index int) char {
-	if index >= len(word) {
-		return char("")
-	}
-
-	return char(word[index])
-}
-
-func (c char) is(chars string) bool {
-	for _, char := range strings.Split(chars, "") {
-		if string(c) == char {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (c char) isNot(chars string) bool {
-	return !c.is(chars)
-}
-
 // Stemmer is object for stemming word
 type Stemmer struct {
-	dictionary    Dictionary
-	rxPrefixFirst *regexp.Regexp
-	rxParticle    *regexp.Regexp
-	rxPossesive   *regexp.Regexp
-	rxSuffix      *regexp.Regexp
+	dictionary Dictionary
 }
 
 // NewStemmer returns new Stemmer using dict as its dictionary
 func NewStemmer(dict Dictionary) Stemmer {
-	return Stemmer{
-		dictionary:    dict,
-		rxPrefixFirst: regexp.MustCompile(`^(be.+lah|be.+an|me.+i|di.+i|pe.+i|ter.+i)$`),
-		rxParticle:    regexp.MustCompile(`-?(lah|kah|tah|pun)$`),
-		rxPossesive:   regexp.MustCompile(`-?(ku|mu|nya)$`),
-		rxSuffix:      regexp.MustCompile(`-?(is|isme|isasi|i|kan|an)$`),
-	}
+	return Stemmer{dict}
 }
 
 // ChangeDictionary changes dictionary that used in Stemmer
@@ -80,7 +40,7 @@ func (stemmer Stemmer) Stem(word string) string {
 	}
 
 	// Check if prefix must be removed first
-	if stemmer.rxPrefixFirst.MatchString(word) {
+	if rxPrefixFirst.MatchString(word) {
 		// Remove prefix
 		rootFound, word = stemmer.removePrefixes(word)
 		if rootFound {
@@ -146,19 +106,19 @@ func (stemmer Stemmer) Stem(word string) string {
 }
 
 func (stemmer Stemmer) removeParticle(word string) (string, string) {
-	result := stemmer.rxParticle.ReplaceAllString(word, "")
+	result := rxParticle.ReplaceAllString(word, "")
 	particle := strings.Replace(word, result, "", 1)
 	return particle, result
 }
 
 func (stemmer Stemmer) removePossesive(word string) (string, string) {
-	result := stemmer.rxPossesive.ReplaceAllString(word, "")
+	result := rxPossesive.ReplaceAllString(word, "")
 	possesive := strings.Replace(word, result, "", 1)
 	return possesive, result
 }
 
 func (stemmer Stemmer) removeSuffix(word string) (string, string) {
-	result := stemmer.rxSuffix.ReplaceAllString(word, "")
+	result := rxSuffix.ReplaceAllString(word, "")
 	suffix := strings.Replace(word, result, "", 1)
 	return suffix, result
 }
@@ -221,320 +181,320 @@ func (stemmer Stemmer) removePrefixes(word string) (bool, string) {
 	return false, word
 }
 
-func (stemmer Stemmer) removePrefix(word string) (string, string, []string) {
-	var (
-		prefix   string
-		result   string
-		recoding []string
-	)
+func (stemmer Stemmer) removePrefix(word string) (prefix string, result string, recoding []string) {
+	if strings.HasPrefix(word, "kau") {
+		return "kau", word[3:], nil
+	}
 
-	if strings.HasPrefix(word, "di") || strings.HasPrefix(word, "ke") || strings.HasPrefix(word, "se") || strings.HasPrefix(word, "ku") {
-		prefix = word[:2]
+	prefix = word[:2]
+	switch prefix {
+	case "di", "ke", "se", "ku":
 		result = word[2:]
-	} else if strings.HasPrefix(word, "kau") {
-		prefix = "kau"
-		result = word[3:]
-	} else if strings.HasPrefix(word, "me") {
-		prefix = "me"
-		result, recoding = stemmer.removeMePrefix(word)
-	} else if strings.HasPrefix(word, "pe") {
-		prefix = "pe"
-		result, recoding = stemmer.removePePrefix(word)
-	} else if strings.HasPrefix(word, "be") {
-		prefix = "be"
-		result, recoding = stemmer.removeBePrefix(word)
-	} else if strings.HasPrefix(word, "te") {
-		prefix = "te"
-		result, recoding = stemmer.removeTePrefix(word)
-	} else {
+	case "me":
+		result, recoding = stemmer.removePrefixMe(word)
+	case "pe":
+		result, recoding = stemmer.removePrefixPe(word)
+	case "be":
+		result, recoding = stemmer.removePrefixBe(word)
+	case "te":
+		result, recoding = stemmer.removePrefixTe(word)
+	default:
 		result, recoding = stemmer.removeInfix(word)
 	}
 
 	return prefix, result, recoding
 }
 
-func (stemmer Stemmer) removeMePrefix(word string) (string, []string) {
-	s3 := newChar(word, 2)
-	s4 := newChar(word, 3)
-	s5 := newChar(word, 4)
-
-	// Pattern 01
+func (stemmer Stemmer) removePrefixMe(word string) (string, []string) {
+	// Pattern 1
 	// me{l|r|w|y}V => me-{l|r|w|y}V
-	if s3.is("lrwy") && s4.is(vowel) {
-		return word[2:], nil
+	matches := rxPrefixMe1.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 02
+	// Pattern 2
 	// mem{b|f|v} => mem-{b|f|v}
-	if s3.is("m") && s4.is("bfv") {
-		return word[3:], nil
+	matches = rxPrefixMe2.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 03
+	// Pattern 3
 	// mempe => mem-pe
-	if s3.is("m") && s4.is("p") && s5.is("e") {
-		return word[3:], nil
+	matches = rxPrefixMe3.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 04
+	// Pattern 4
 	// mem{rV|V} => mem-{rV|V} OR me-p{rV|V}
-	if s3.is("m") && (s4.is(vowel) || (s4.is("r") && s5.is(vowel))) {
-		return word[3:], []string{"m", "p"}
+	matches = rxPrefixMe4.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"m", "p"}
 	}
 
-	// Pattern 05
+	// Pattern 5
 	// men{c|d|j|s|t|z} => men-{c|d|j|s|t|z}
-	if s3.is("n") && s4.is("cdjstz") {
-		return word[3:], nil
+	matches = rxPrefixMe5.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 06
+	// Pattern 6
 	// menV => nV OR tV
-	if s3.is("n") && s4.is(vowel) {
-		return word[3:], []string{"n", "t"}
+	matches = rxPrefixMe6.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"n", "t"}
 	}
 
-	// Pattern 07
+	// Pattern 7
 	// meng{g|h|q|k} => meng-{g|h|q|k}
-	if s3.is("n") && s4.is("g") && s5.is("ghqk") {
-		return word[4:], nil
+	matches = rxPrefixMe7.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 08
+	// Pattern 8
 	// mengV => meng-V OR meng-kV OR me-ngV OR mengV- where V = 'e'
-	if s3.is("n") && s4.is("g") && s5.is(vowel) {
-		if s5.is("e") {
-			return word[5:], nil
+	matches = rxPrefixMe8.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		if matches[2] == "e" {
+			return matches[3], nil
 		}
 
-		return word[4:], []string{"ng", "k"}
+		return matches[1], []string{"ng", "k"}
 	}
 
-	// Pattern 09
+	// Pattern 9
 	// menyV => meny-sV OR me-nyV to stem menyala
-	if s3.is("n") && s4.is("y") && s5.is(vowel) {
-		if s5.is("a") {
-			return word[2:], nil
+	matches = rxPrefixMe9.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		if matches[2] == "a" {
+			return "ny" + matches[1], nil
 		}
 
-		return "s" + word[4:], nil
+		return "s" + matches[1], nil
 	}
 
 	// Pattern 10
-	// mempV => mem-pV where V != 'e'
-	if s3.is("m") && s4.is("p") && s5.isNot("e") {
-		return word[3:], nil
+	// mempV => mem-pA where A != 'e'
+	matches = rxPrefixMe10.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	return word, nil
 }
 
-func (stemmer Stemmer) removePePrefix(word string) (string, []string) {
-	s3 := newChar(word, 2)
-	s4 := newChar(word, 3)
-	s5 := newChar(word, 4)
-	s6 := newChar(word, 5)
-	s7 := newChar(word, 6)
-	s8 := newChar(word, 7)
-
-	// Pattern 01
+func (stemmer Stemmer) removePrefixPe(word string) (string, []string) {
+	// Pattern 1
 	// pe{w|y}V => pe-{w|y}V
-	if s3.is("wy") && s4.is(vowel) {
-		return word[2:], nil
+	matches := rxPrefixPe1.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 02
+	// Pattern 2
 	// perV => per-V OR pe-rV
-	if s3.is("r") && s4.is(vowel) {
-		return word[3:], []string{"r"}
+	matches = rxPrefixPe2.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"r"}
 	}
 
-	// Pattern 03
+	// Pattern 3
 	// perCAP => per-CAP where C != 'r' and P != 'er'
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.isNot("e") {
-		return word[3:], nil
+	matches = rxPrefixPe3.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 4
 	// perCAerV => per-CAerV where C != 'r'
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.is("e") && s7.is("r") && s8.is(vowel) {
-		return word[3:], nil
+	matches = rxPrefixPe4.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 05
+	// Pattern 5
 	// pem{b|f|v} => pem-{b|f|v}
-	if s3.is("m") && s4.is("bfv") {
-		return word[3:], nil
+	matches = rxPrefixPe5.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 06
+	// Pattern 6
 	// pem{rV|V} => pe-m{rV|V} OR pe-p{rV|V}
-	if s3.is("m") && (s4.is(vowel) || (s4.is("r") && s5.is(vowel))) {
-		return word[3:], []string{"m", "p"}
+	matches = rxPrefixPe6.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"m", "p"}
 	}
 
-	// Pattern 07
+	// Pattern 7
 	// pen{c|d|j|s|t|z} => pen-{c|d|j|s|t|z}
-	if s3.is("n") && s4.is("cdjstz") {
-		return word[3:], nil
+	matches = rxPrefixPe7.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 08
+	// Pattern 8
 	// penV => pe-nV OR pe-tV
-	if s3.is("n") && s4.is(vowel) {
-		return word[3:], []string{"n", "t"}
+	matches = rxPrefixPe8.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"n", "t"}
 	}
 
-	// Pattern 09
+	// Pattern 9
 	// pengC => peng-C
-	if s3.is("n") && s4.is("g") && s5.is(consonant) {
-		return word[4:], nil
+	matches = rxPrefixPe9.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 10
 	// pengV => peng-V OR peng-kV OR pengV- where V = 'e'
-	if s3.is("n") && s4.is("g") && s5.is(vowel) {
-		if s5.is("e") {
-			return word[5:], nil
+	matches = rxPrefixPe10.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		if matches[2] == "e" {
+			return matches[3], nil
 		}
 
-		return word[4:], []string{"k"}
+		return matches[1], []string{"k"}
 	}
 
 	// Pattern 11
 	// penyV => peny-sV OR pe-nyV
-	if s3.is("n") && s4.is("y") && s5.is(vowel) {
-		return word[4:], []string{"s", "ny"}
+	matches = rxPrefixPe11.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"s", "ny"}
 	}
 
 	// Pattern 12
 	// pelV => pe-lV OR pel-V for pelajar
-	if s3.is("l") && s4.is(vowel) {
+	matches = rxPrefixPe12.FindStringSubmatch(word)
+	if len(matches) != 0 {
 		if word == "pelajar" {
 			return "ajar", nil
 		}
 
-		return word[2:], nil
+		return matches[1], nil
 	}
 
 	// Pattern 13
-	// peCerV => per-erV where C != {r|w|y|l|m|n}
-	if s3.is(consonant) && s3.isNot("rwylmn") && s4.is("e") && s5.is("r") && s6.is(vowel) {
-		return word[3:], nil
+	// peCerV => peC-erV where C != {r|w|y|l|m|n}
+	matches = rxPrefixPe13.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 14
 	// peCP => pe-CP where C != {r|w|y|l|m|n} and P != 'er'
-	if s3.is(consonant) && s3.isNot("rwylmn") && s4.isNot("e") {
-		return word[2:], nil
+	matches = rxPrefixPe14.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 15
 	// peC1erC2 => pe-C1erC2 where C1 != {r|w|y|l|m|n}
-	if s3.is(consonant) && s3.isNot("rwylmn") && s4.is("e") && s5.is("r") && s6.is(consonant) {
-		return word[2:], nil
+	matches = rxPrefixPe15.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	return word, nil
 }
 
-func (stemmer Stemmer) removeBePrefix(word string) (string, []string) {
-	s3 := newChar(word, 2)
-	s4 := newChar(word, 3)
-	s5 := newChar(word, 4)
-	s6 := newChar(word, 5)
-	s7 := newChar(word, 6)
-	s8 := newChar(word, 7)
-
-	// Pattern 01
+func (stemmer Stemmer) removePrefixBe(word string) (string, []string) {
+	// Pattern 1
 	// berV => ber-V OR be-rV
-	if s3.is("r") && s4.is(vowel) {
-		return word[3:], []string{"r"}
+	matches := rxPrefixBe1.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"r"}
 	}
 
-	// Pattern 02
-	// berCAP => ber-CAP
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.isNot("e") {
-		return word[3:], nil
+	// Pattern 2
+	// berCAP => ber-CAP where C != 'r' and P != 'er'
+	matches = rxPrefixBe2.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 3
 	// berCAerV => ber-CAerV where C != 'r'
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("") && s6.is("e") && s7.is("r") && s8.is(vowel) {
-		return word[3:], nil
+	matches = rxPrefixBe3.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 04
+	// Pattern 4
 	// belajar => bel-ajar
-	if word == "belajar" {
-		return word[3:], nil
+	matches = rxPrefixBe4.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 5
 	// beC1erC2 => be-C1erC2 where C1 != {'r'|'l'}
-	if s3.is(consonant) && s3.isNot("r") && s3.isNot("l") && s4.is("e") && s5.is("r") && s6.is(consonant) {
-		return word[2:], nil
+	matches = rxPrefixBe5.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	return word, nil
 }
 
-func (stemmer Stemmer) removeTePrefix(word string) (string, []string) {
-	s3 := newChar(word, 2)
-	s4 := newChar(word, 3)
-	s5 := newChar(word, 4)
-	s6 := newChar(word, 5)
-	s7 := newChar(word, 6)
-
-	// Pattern 01
+func (stemmer Stemmer) removePrefixTe(word string) (string, []string) {
+	// Pattern 1
 	// terV => ter-V OR te-rV
-	if s3.is("r") && s4.is(vowel) {
-		return word[3:], []string{"r"}
+	matches := rxPrefixTe1.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], []string{"r"}
 	}
 
-	// Pattern 02
+	// Pattern 2
 	// terCerV => ter-CerV where C != 'r'
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.is("e") && s6.is("r") && s7.is(vowel) {
-		return word[3:], nil
+	matches = rxPrefixTe2.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	// Pattern 3
 	// terCP => ter-CP where C != 'r' and P != 'er'
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.isNot("e") {
-		return word[3:], nil
+	matches = rxPrefixTe3.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 04
+	// Pattern 4
 	// teC1erC2 => te-C1erC2 where C1 != 'r'
-	if s3.is(consonant) && s3.isNot("r") && s4.is("e") && s5.is("r") && s6.is(consonant) {
-		return word[2:], nil
+	matches = rxPrefixTe4.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
-	// Pattern 05
+	// Pattern 5
 	// terC1erC2 => ter-C1erC2 where C1 != 'r'
-	if s3.is("r") && s4.is(consonant) && s4.isNot("r") && s5.is("e") && s6.is("r") && s7.is(consonant) {
-		return word[3:], nil
+	matches = rxPrefixTe5.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[1], nil
 	}
 
 	return word, nil
 }
 
 func (stemmer Stemmer) removeInfix(word string) (string, []string) {
-	s1 := newChar(word, 0)
-	s2 := newChar(word, 1)
-	s3 := newChar(word, 2)
-	s4 := newChar(word, 3)
-
-	// Pattern 01
+	// Pattern 1
 	// CerV => CerV OR CV
-	if s1.is(consonant) && s2.is("e") && s3.is("rlm") && s4.is(vowel) {
-		return word[3:], []string{word[:3], word[:1]}
+	matches := rxInfix1.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[3], []string{matches[1], matches[2]}
 	}
 
-	// Pattern 02
+	// Pattern 2
 	// CinV => CinV OR CV
-	if s1.is(consonant) && s2.is("i") && s3.is("n") && s4.is(vowel) {
-		return word[3:], []string{word[:3], word[:1]}
+	matches = rxInfix2.FindStringSubmatch(word)
+	if len(matches) != 0 {
+		return matches[3], []string{matches[1], matches[2]}
 	}
 
 	return word, nil
